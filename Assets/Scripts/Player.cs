@@ -12,6 +12,9 @@ public class Player : MonoBehaviour
     bool IsMoving;
     bool IsHorizontalMove;
     bool IsVerticalMove;
+    Vector2 DirVec;  // Direction Vector
+
+    GameObject ScanedObject;
 
     void Awake()
     {
@@ -20,6 +23,7 @@ public class Player : MonoBehaviour
         IsMoving = false;
         IsHorizontalMove = false;
         IsVerticalMove = false;
+        DirVec = Vector2.down;
     }
 
     void FixedUpdate()
@@ -61,6 +65,16 @@ public class Player : MonoBehaviour
         // 대각이동을 제한한 코드
 
         rigid.velocity = new Vector2(h, v) * 3;  // velocity를 설정해준 거라 델타타임 안해줘도 됨
+        Debug.DrawRay(transform.position + new Vector3(0, -0.2f, 0), DirVec * 0.4f, Color.green);
+
+        RaycastHit2D FrontRay = Physics2D.Raycast(transform.position + new Vector3(0, -0.2f, 0), DirVec, 0.4f, LayerMask.GetMask("Objects"));
+
+        if (FrontRay.collider != null) {
+            ScanedObject = FrontRay.collider.gameObject;
+        }
+        else {
+            ScanedObject = null;
+        }
     }
 
     void Update()
@@ -75,7 +89,7 @@ public class Player : MonoBehaviour
         // }
         // 대각이동을 제한한 코드
 
-        // 토비폭스 식 무브먼트
+        // 언더테일 무브먼트
         // 정지 상태일 때 횡이동
         if (!IsMoving && Input.GetButtonDown("Horizontal")) {
             IsMoving = true;  // 움직인다
@@ -84,7 +98,7 @@ public class Player : MonoBehaviour
             anim.SetBool("Horizontal1st", true);  // 횡이동 우선
         }
         // 정지 상태일 때 종이동
-        if (!IsMoving && Input.GetButtonDown("Vertical")) {
+        else if (!IsMoving && Input.GetButtonDown("Vertical")) {
             IsMoving = true;
             IsHorizontalMove = false;
             IsVerticalMove = true;
@@ -95,9 +109,17 @@ public class Player : MonoBehaviour
             IsVerticalMove = true;  // 종이동 중
             anim.SetBool("Horizontal1st", true);  // 횡이동 우선
         }
+        else if (IsVerticalMove && Input.GetButtonDown("Vertical")) {
+            IsVerticalMove = false;
+            anim.SetBool("Horizontal1st", true);
+        }
         // 종이동 중 횡이동 실행
         if (IsVerticalMove && Input.GetButtonDown("Horizontal")) {
-            IsHorizontalMove = true;  // 횡이동 중
+            IsHorizontalMove = !IsHorizontalMove;  // 횡이동 중
+            anim.SetBool("Horizontal1st", !IsHorizontalMove);  // 종이동 우선
+        }
+        else if (IsHorizontalMove && Input.GetButtonDown("Horizontal")) {
+            IsHorizontalMove = false;
             anim.SetBool("Horizontal1st", false);
         }
         // 종이동 중 종이동 종료
@@ -108,7 +130,7 @@ public class Player : MonoBehaviour
         // 횡이동 중 횡이동 종료
         if (!IsVerticalMove && Input.GetButtonUp("Horizontal")) {
             IsHorizontalMove = !IsHorizontalMove;  // 이중 입력 처리
-            anim.SetBool("Horizontal1st", !IsHorizontalMove);  // false, 종이동 우선
+            anim.SetBool("Horizontal1st", IsHorizontalMove);  // false, 종이동 우선
         }
         // 대각이동 중
         if (IsHorizontalMove && IsVerticalMove) {
@@ -127,6 +149,25 @@ public class Player : MonoBehaviour
         // 이동중이 아닐 시
         if (!IsHorizontalMove && !IsVerticalMove) {
             IsMoving = false;
+        }
+
+        // 정면 인식 로직
+        if (IsHorizontalMove && anim.GetBool("Horizontal1st")) {
+            if (h > 0)
+                DirVec = Vector2.right;
+            else if (h < 0)
+                DirVec = Vector2.left;
+        }
+
+        else if (IsVerticalMove && !anim.GetBool("Horizontal1st")) {
+            if (v > 0)
+                DirVec = Vector2.up;
+            else if (v < 0)
+                DirVec = Vector2.down;
+        }
+
+        if (Input.GetButtonDown("Jump") && ScanedObject != null) {
+            Debug.Log("This is a " + ScanedObject.name);
         }
     }
 }
