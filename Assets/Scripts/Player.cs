@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     Vector2 DirVec;  // Direction Vector
 
     GameObject ScanedObject;
+    public GameManager GM;
 
     void Awake()
     {
@@ -28,8 +29,15 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {   
-        h = Input.GetAxisRaw("Horizontal");
-        v = Input.GetAxisRaw("Vertical");
+        if (!GM.IsAction) {
+            h = Input.GetAxisRaw("Horizontal");
+            v = Input.GetAxisRaw("Vertical");
+        }
+
+        else {
+            h = v = 0;
+        }
+        
 
         anim.SetInteger("hAxisRaw", (int)h);
         anim.SetInteger("vAxisRaw", (int)v);
@@ -65,9 +73,9 @@ public class Player : MonoBehaviour
         // 대각이동을 제한한 코드
 
         rigid.velocity = new Vector2(h, v) * 3;  // velocity를 설정해준 거라 델타타임 안해줘도 됨
-        Debug.DrawRay(transform.position + new Vector3(0, -0.2f, 0), DirVec * 0.4f, Color.green);
+        Debug.DrawRay(transform.position + new Vector3(0, -0.2f, 0), DirVec * 0.5f, Color.green);
 
-        RaycastHit2D FrontRay = Physics2D.Raycast(transform.position + new Vector3(0, -0.2f, 0), DirVec, 0.4f, LayerMask.GetMask("Objects"));
+        RaycastHit2D FrontRay = Physics2D.Raycast(transform.position + new Vector3(0, -0.2f, 0), DirVec, 0.5f, LayerMask.GetMask("Objects"));
 
         if (FrontRay.collider != null) {
             ScanedObject = FrontRay.collider.gameObject;
@@ -105,42 +113,42 @@ public class Player : MonoBehaviour
             anim.SetBool("Horizontal1st", false);  // 종이동 우선
         }
         // 횡이동 중 종이동 실행
-        if (IsHorizontalMove && Input.GetButtonDown("Vertical")) {
-            IsVerticalMove = true;  // 종이동 중
+        if (IsHorizontalMove && !IsVerticalMove && Input.GetButtonDown("Vertical")) {
+            IsVerticalMove = !IsVerticalMove;  // 종이동 중
             anim.SetBool("Horizontal1st", true);  // 횡이동 우선
         }
-        else if (IsVerticalMove && Input.GetButtonDown("Vertical")) {
+        else if (!IsHorizontalMove && IsVerticalMove && Input.GetButtonDown("Vertical")) {
             IsVerticalMove = false;
             anim.SetBool("Horizontal1st", true);
         }
         // 종이동 중 횡이동 실행
-        if (IsVerticalMove && Input.GetButtonDown("Horizontal")) {
+        if (IsVerticalMove && !IsHorizontalMove && Input.GetButtonDown("Horizontal")) {
             IsHorizontalMove = !IsHorizontalMove;  // 횡이동 중
-            anim.SetBool("Horizontal1st", !IsHorizontalMove);  // 종이동 우선
+            anim.SetBool("Horizontal1st", false);  // 종이동 우선
         }
-        else if (IsHorizontalMove && Input.GetButtonDown("Horizontal")) {
+        else if (IsHorizontalMove && !IsVerticalMove && Input.GetButtonDown("Horizontal")) {
             IsHorizontalMove = false;
             anim.SetBool("Horizontal1st", false);
         }
         // 종이동 중 종이동 종료
-        if (!IsHorizontalMove && Input.GetButtonUp("Vertical")) {
+        if (Input.GetButtonUp("Vertical")) {
             IsVerticalMove = !IsVerticalMove;  // 이중 입력 처리
             anim.SetBool("Horizontal1st", !IsVerticalMove);  // true, 횡이동 우선
         }
         // 횡이동 중 횡이동 종료
-        if (!IsVerticalMove && Input.GetButtonUp("Horizontal")) {
+        if (Input.GetButtonUp("Horizontal")) {
             IsHorizontalMove = !IsHorizontalMove;  // 이중 입력 처리
             anim.SetBool("Horizontal1st", IsHorizontalMove);  // false, 종이동 우선
         }
         // 대각이동 중
         if (IsHorizontalMove && IsVerticalMove) {
-            if (Input.GetButtonUp("Horizontal"))  // 종이동 전환
+            if (Input.GetButtonUp("Horizontal") || Input.GetButtonDown("Horizontal"))  // 종이동 전환
             {
                 IsHorizontalMove = false;
                 anim.SetBool("Horizontal1st", false);
             }
             
-            else if (Input.GetButtonUp("Vertical"))  // 횡이동 전환
+            else if (Input.GetButtonUp("Vertical") || Input.GetButtonDown("Vertical"))  // 횡이동 전환
             {
                 IsVerticalMove = false;
                 anim.SetBool("Horizontal1st", true);
@@ -167,7 +175,7 @@ public class Player : MonoBehaviour
         }
 
         if (Input.GetButtonDown("Jump") && ScanedObject != null) {
-            Debug.Log("This is a " + ScanedObject.name);
+            GM.Action(ScanedObject);
         }
     }
 }
