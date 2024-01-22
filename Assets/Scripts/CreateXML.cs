@@ -1,40 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using System.Xml;
 using UnityEngine;
-using System.IO;
 
-public class GameManager : MonoBehaviour
+public class CreateXML : MonoBehaviour
 {
-    public TextMeshProUGUI TalkText;
-    public GameObject IMG;
-    public bool IsAction;
-
-    void Awake()
-    {
-        IsAction = false;
-    }
-
-    public void Action(GameObject scanedObj) {
-        if (IsAction) {
-            IsAction = false;
-        }
-
-        else {
-            IsAction = true;
-            TalkText.text = "이것의 이름은 " + scanedObj.name + "(이)라고 한다.";
-        }
-        
-        IMG.SetActive(IsAction);
-    }
-
     void Start()
-    {  
-        // 파일 존재 여부 확인
-        if (!File.Exists("./Data")) {
-            CreateXml();
-        }
+    {
+        CreateXml();
     }
 
     void CreateXml()
