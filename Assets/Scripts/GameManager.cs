@@ -4,6 +4,10 @@ using TMPro;
 using System.Xml;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UIElements;
+using System.Linq;
+using System;
+using Unity.VisualScripting;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,22 +15,16 @@ public class GameManager : MonoBehaviour
     public GameObject IMG;
     public bool IsAction;
 
+    XmlNodeList TalkNodeList;
+    bool WaitNext;
+    int RandomTextIndex;
+    int ActionIndex;
+    int CurrIndex;
+
     void Awake()
     {
         IsAction = false;
-    }
-
-    public void Action(GameObject scanedObj) {
-        if (IsAction) {
-            IsAction = false;
-        }
-
-        else {
-            IsAction = true;
-            TalkText.text = "이것의 이름은 " + scanedObj.name + "(이)라고 한다.";
-        }
-        
-        IMG.SetActive(IsAction);
+        CurrIndex = 0;
     }
 
     void Start()
@@ -35,6 +33,61 @@ public class GameManager : MonoBehaviour
         if (!File.Exists("./Data")) {
             CreateXml();
         }
+    }
+
+    public void Action(ReadXml scanedObj) {
+        if (IsAction) {
+            if (WaitNext) {
+                IsAction = true;
+                Talk(scanedObj);
+            }
+
+            else {
+                IsAction = false;
+            }
+        }
+
+        else {
+            IsAction = true;
+            Talk(scanedObj);
+        }
+    }
+
+    void Talk(ReadXml TalkObj) {
+        // 최초 액션 시도 시 노드를 가져옴
+        if (TalkNodeList == null) {
+            TalkNodeList = TalkObj.NodeData.SelectNodes("DefaultTalking"); // 일상어 노드 두개를 불러옴
+            RandomTextIndex = UnityEngine.Random.Range(0, TalkNodeList.Count);
+
+            ActionIndex = TalkNodeList[RandomTextIndex].SelectNodes("Details").Count;
+
+            CurrIndex = 0;
+            TalkText.text = TalkNodeList[RandomTextIndex].SelectNodes("Details")[CurrIndex].InnerText;
+            WaitNext = true;
+            IMG.SetActive(true);
+        }
+
+        // 다음 성분으로 넘김
+        else if (ActionIndex-1 > CurrIndex) {
+            CurrIndex ++;
+            TalkText.text = TalkNodeList[RandomTextIndex].SelectNodes("Details")[CurrIndex].InnerText;
+        }
+
+        // 텍스트 인덱스 초과 시 노드를 초기화
+        else {
+            TalkNodeList = null;
+            WaitNext = false;
+            IsAction = false;
+
+            IMG.SetActive(false);
+        }
+
+        // catch (Exception ex)
+        // {
+        //     Debug.Log($"오류 발생 : {ex.Message}");
+        //     Debug.Log(CurrText);
+        //     Debug.Log(TalkNodeList);
+        // }
     }
 
     void CreateXml()

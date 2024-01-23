@@ -3,16 +3,31 @@
   <NPC>
     <Name>Ludo</Name>
     <ID>101</ID>
-    <DefaultTalking>"무슨 일이야?"</DefaultTalking>
+    <DefaultTalking>
+      <Details>"무슨 일이야?"</Details>
+    </DefaultTalking>
+    <DefaultTalking>
+      <Details>"난 바빠."</Details>
+    </DefaultTalking>
   </NPC>
   <NPC>
     <Name>Luna</Name>
     <ID>102</ID>
-    <DefaultTalking>"안녕?"</DefaultTalking>
+    <DefaultTalking>
+      <Details>"안녕?"</Details>
+      <Details>"어젯밤은 별일 없었니?"</Details>
+    </DefaultTalking>
+    <DefaultTalking>
+      <Details>"좋은 아침이야!"</Details>
+      <Details>"어젯밤은 별일 없었니?"</Details>
+    </DefaultTalking>
   </NPC>
   <Objects>
     <Name>Box</Name>
     <ID>1001</ID>
-    <DefaultDescription>"상자다."</DefaultDescription>
+    <DefaultTalking>
+     <Details>"상자다."</Details>
+    </DefaultTalking>
+    <RepeatTalking>"계속 바라본다고 해서 달라지는 건 없을 것 같다."</RepeatTalking>
   </Objects>
 </root>

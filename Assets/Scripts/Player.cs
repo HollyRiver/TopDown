@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     bool IsVerticalMove;
     Vector2 DirVec;  // Direction Vector
 
-    GameObject ScanedObject;
+    ReadXml ScanedObject;
     public GameManager GM;
 
     void Awake()
@@ -78,7 +78,7 @@ public class Player : MonoBehaviour
         RaycastHit2D FrontRay = Physics2D.Raycast(transform.position + new Vector3(0, -0.2f, 0), DirVec, 0.5f, LayerMask.GetMask("Objects"));
 
         if (FrontRay.collider != null) {
-            ScanedObject = FrontRay.collider.gameObject;
+            ScanedObject = FrontRay.collider.gameObject.GetComponent<ReadXml>();
         }
         else {
             ScanedObject = null;

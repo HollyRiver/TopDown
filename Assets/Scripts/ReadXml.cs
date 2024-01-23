@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class ReadXml : MonoBehaviour
 {
+    public XmlNode NodeData;  // 외부 클래스에 넣을 데이터 파일
     public int ID;
     public bool IsNPC;
     TextAsset textAsset;
@@ -22,6 +23,10 @@ public class ReadXml : MonoBehaviour
         
         else
             LoadXmlObj();
+
+        Debug.Log(NodeData.SelectSingleNode("Name").InnerText + "의 데이터를 불러왔습니다.");
+        
+        // Debug.Log(NodeData.SelectNodes("DefaultTalking")[0].SelectNodes("Details")[0].InnerText);
     }
 
     void LoadXml()
@@ -30,9 +35,9 @@ public class ReadXml : MonoBehaviour
         XmlNodeList NPCNodes = xmlDoc.SelectNodes("root/NPC");
         
         foreach (XmlNode node in NPCNodes) {
-            Debug.Log("Name : " + node.SelectSingleNode("Name").InnerText);
-            Debug.Log("ID : " + node.SelectSingleNode("ID").InnerText);
-            Debug.Log("DefaultTalking : " + node.SelectSingleNode("DefaultTalking").InnerText);
+            if (node.SelectSingleNode("ID").InnerText == ID.ToString()) {
+                NodeData = node;
+            }
         }
     }
 
@@ -42,9 +47,9 @@ public class ReadXml : MonoBehaviour
         XmlNodeList ObjNodes = xmlDoc.SelectNodes("root/Objects");
         
         foreach (XmlNode node in ObjNodes) {
-            Debug.Log("Name : " + node.SelectSingleNode("Name").InnerText);
-            Debug.Log("ID : " + node.SelectSingleNode("ID").InnerText);
-            Debug.Log("DefaultDescription : " + node.SelectSingleNode("DefaultDescription").InnerText);
+            if (node.SelectSingleNode("ID").InnerText == ID.ToString()) {
+                NodeData = node;
+            }
         }
     }
 }
