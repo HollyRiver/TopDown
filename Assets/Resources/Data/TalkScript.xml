@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<root>
+  <NPC>
+    <Name>Ludo</Name>
+    <ID>101</ID>
+    <DefaultTalking>"무슨 일이야?"</DefaultTalking>
+  </NPC>
+  <NPC>
+    <Name>Luna</Name>
+    <ID>102</ID>
+    <DefaultTalking>"안녕?"</DefaultTalking>
+  </NPC>
+  <Objects>
+    <Name>Box</Name>
+    <ID>1001</ID>
+    <DefaultDescription>"상자다."</DefaultDescription>
+  </Objects>
+</root>
