@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using TMPro;
 using System.Xml;
 using UnityEngine;
-using System.IO;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
+using System.IO;
 using System.Linq;
 using System;
 using Unity.VisualScripting;
@@ -12,19 +13,26 @@ using Unity.VisualScripting;
 public class GameManager : MonoBehaviour
 {
     public TextMeshProUGUI TalkText;
-    public GameObject IMG;
+    public GameObject PanelIMG;
+    public UnityEngine.UI.Image CharacterIMG;
     public bool IsAction;
 
     XmlNodeList TalkNodeList;
+    string[] TextStatementList;
     bool WaitNext;
     int RandomTextIndex;
     int ActionIndex;
-    int CurrIndex;
+    int TalkIndex;
 
     void Awake()
     {
         IsAction = false;
-        CurrIndex = 0;
+        TextStatementList = new string[0];
+        TalkIndex = 0;
+        WaitNext = false;
+        RandomTextIndex = 0;
+        ActionIndex = 1;
+        TalkIndex = 0;
     }
 
     void Start()
@@ -56,30 +64,55 @@ public class GameManager : MonoBehaviour
     void Talk(ReadXml TalkObj) {
         // 최초 액션 시도 시 노드를 가져옴
         if (TalkNodeList == null) {
-            TalkNodeList = TalkObj.NodeData.SelectNodes("DefaultTalking"); // 일상어 노드 두개를 불러옴
+            TalkNodeList = TalkObj.NodeData.SelectNodes("DefaultTalking"); // 일상어 노드들을 가져옴
             RandomTextIndex = UnityEngine.Random.Range(0, TalkNodeList.Count);
 
             ActionIndex = TalkNodeList[RandomTextIndex].SelectNodes("Details").Count;
+            TalkIndex = 0;
+            TextStatementList = TalkNodeList[RandomTextIndex].SelectNodes("Details")[TalkIndex].InnerText.Split("**");
+            
+            if (TalkObj.IsNPC) {
+                CharacterIMG.sprite = TalkObj.FeelingSprite[int.Parse(TextStatementList[1])];
+                CharacterIMG.color = new Color32(255, 255, 255, 255);
+                TalkText.rectTransform.offsetMin = new Vector2(200, TalkText.rectTransform.offsetMin.y);
+            }
 
-            CurrIndex = 0;
-            TalkText.text = TalkNodeList[RandomTextIndex].SelectNodes("Details")[CurrIndex].InnerText;
+            else {
+                CharacterIMG.sprite = null;
+                CharacterIMG.color = new Color32(0, 0, 0, 0);
+                TalkText.rectTransform.offsetMin = new Vector2(40, TalkText.rectTransform.offsetMin.y);
+            }
+
+            TalkText.text = TextStatementList[0];
             WaitNext = true;
-            IMG.SetActive(true);
+            PanelIMG.SetActive(true);
         }
 
         // 다음 성분으로 넘김
-        else if (ActionIndex-1 > CurrIndex) {
-            CurrIndex ++;
-            TalkText.text = TalkNodeList[RandomTextIndex].SelectNodes("Details")[CurrIndex].InnerText;
+        else if (ActionIndex-1 > TalkIndex) {
+            TalkIndex ++;
+            TextStatementList = TalkNodeList[RandomTextIndex].SelectNodes("Details")[TalkIndex].InnerText.Split("**");
+
+            if (TalkObj.IsNPC) {
+                CharacterIMG.sprite = TalkObj.FeelingSprite[int.Parse(TextStatementList[1])];
+            }
+
+            else {
+                CharacterIMG.sprite = null;
+            }
+
+            TalkText.text = TextStatementList[0];
         }
 
         // 텍스트 인덱스 초과 시 노드를 초기화
         else {
+            CharacterIMG.sprite = null;
             TalkNodeList = null;
+            TalkText.text = null;
             WaitNext = false;
             IsAction = false;
 
-            IMG.SetActive(false);
+            PanelIMG.SetActive(false);
         }
 
         // catch (Exception ex)

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
+using Microsoft.Unity.VisualStudio.Editor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -9,8 +10,17 @@ public class ReadXml : MonoBehaviour
     public XmlNode NodeData;  // 외부 클래스에 넣을 데이터 파일
     public int ID;
     public bool IsNPC;
+    public Sprite[] Image;
+
+    public Dictionary<int, Sprite> FeelingSprite;
     TextAsset textAsset;
-    XmlDocument xmlDoc = new XmlDocument();
+    XmlDocument xmlDoc;
+
+    void Awake()
+    {
+        xmlDoc = new XmlDocument();
+        FeelingSprite = new Dictionary<int, Sprite>();
+    }
 
     void Start()
     {
@@ -18,20 +28,20 @@ public class ReadXml : MonoBehaviour
         Debug.Log(textAsset);
         xmlDoc.LoadXml(textAsset.text);
 
-        if (IsNPC)
+        if (IsNPC) {
             LoadXml();
-        
-        else
-            LoadXmlObj();
+            GenerateData();
+        }
 
-        Debug.Log(NodeData.SelectSingleNode("Name").InnerText + "의 데이터를 불러왔습니다.");
+        else {
+            LoadXmlObj();
+        }
         
-        // Debug.Log(NodeData.SelectNodes("DefaultTalking")[0].SelectNodes("Details")[0].InnerText);
+        Debug.Log(NodeData.SelectSingleNode("Name").InnerText + "의 데이터를 불러왔습니다.");
     }
 
     void LoadXml()
     {   
-        Debug.Log("NPC 데이터를 불러오는 중입니다.");
         XmlNodeList NPCNodes = xmlDoc.SelectNodes("root/NPC");
         
         foreach (XmlNode node in NPCNodes) {
@@ -43,13 +53,19 @@ public class ReadXml : MonoBehaviour
 
     void LoadXmlObj()
     {   
-        Debug.Log("오브젝트 데이터를 불러오는 중입니다.");
         XmlNodeList ObjNodes = xmlDoc.SelectNodes("root/Objects");
         
         foreach (XmlNode node in ObjNodes) {
             if (node.SelectSingleNode("ID").InnerText == ID.ToString()) {
                 NodeData = node;
             }
+        }
+    }
+
+    void GenerateData()
+    {
+        for (int i = 0; i < Image.Length - 1; i++) {
+            FeelingSprite.Add(i, Image[i]);
         }
     }
 }
